@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset=utf-8 />
+    <title>Geo409 Map 02</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: whitesmoke;
+            font-family: Lato, sans-serif;
+            color: #0D0000;
+        }
+        header {
+            padding: 6px 10%;
+        }
+        h1 {
+            display: inline-block;
+            margin-right: 20px;
+            color: #001323;
+        }
+        h2 {
+            display: inline-block;
+            color: #001323;
+        }
+        #map {
+            width: 80%;
+            height: 540px;
+            margin: 10px auto;
+        }
+        footer {
+            padding: 6px 10%;
+            width: 80%;
+        }
+        p {
+            font-size: 1em;
+            color: #001323;
+        }
+        /* Additional style rules go here! */
+        
+
+
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Iguana's Invasion Plan</h1>
+        <h2>Charting Crucial Centers for Warmth Production</h2>
+    </header>
+
+    <div id='map'></div>
+
+    <footer>
+        <p>Map authored by Luke Victor</p>
+        <p>Purple Circle represents 400KM from Knoxville, TN</p>
+        
+    </footer>
+    <link rel="stylesheet" href="MarkerCluster.css"/>
+    <link rel="stylesheet" href="MarkerCluster.Default.css"/>
+    <script src="leaflet.markercluster-src.js"></script>
+    <script src="power-plants-assignment.js"></script>
+    <script>
+        var map = L.map('map', {
+            center: [35.9728,-83.9422],
+            zoom:4
+        });
+        
+ var StyleCoal = {
+                color: 'gray',
+                fillColor: 'black',
+                fillOpacity: .2
+            };
+     var StyleHydro = {
+                color: 'cyan',
+                fillColor: 'yellow',
+                fillOpacity: .7
+      };
+      var Style = {
+                color: '#398d05',
+                fillColor: '#27ff00',
+                fillOpacity: 2
+      };
+                   
+       
+        var tiles = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+                                {
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+            subdomains: 'abcd',
+            minZoom: 0,
+            maxZoom: 18
+        });
+        map.addLayer(tiles);
+        
+        plants.features.sort(function(a,b) {
+            return b.properties.capacity - a.properties.capacity;            
+		});
+        var markers = L.markerClusterGroup();
+        markers.addLayer(L.geoJson(plants, {
+            pointToLayer: function(feature,latlng) {
+                     var iguanaIcon = L.icon({
+iconUrl:'http://upload.wikimedia.org/wikipedia/commons/7/74/Farm-Fresh_chameleon.png',
+    iconSize: [Math.sqrt(feature.properties.capacity), Math.sqrt(feature.properties.capacity)],
+    iconAnchor: [20, 20],
+    popupAnchor: [-3, -3],
+                     })
+                 return L.marker(latlng, {icon: iguanaIcon})
+            },
+//            filter: function(feature,layer) {
+//                if(feature.properties.capacity > 1000){
+//                    return feature
+//                }
+//            },
+            onEachFeature: function(feature,layer) {
+                var props = feature.properties;
+                var content = "<b>"+props.plant_name+"<br>"+"Total Capacity: </b>"+props.capacity.toLocaleString()+" MW<br>";
+                var fuelSource = props.source;
+                for(var fuel in fuelSource){                       
+                       content+=/*"<b>"+name+"<b/><br>"+*/"<b>"+fuel+"<b/>: "+fuelSource[fuel].toLocaleString()+" MW<br>";
+                        layer.bindPopup(content);
+                }
+                }
+            }));
+  map.addLayer(markers);
+        
+    </script>
+    
+</body>
+
+</html>
